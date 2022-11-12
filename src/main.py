@@ -1,29 +1,32 @@
 from fastapi import FastAPI, Query, HTTPException
+import pandas
 from pydantic import BaseModel
-from model import predict, convert
+from src.model import predict, converts
 
 app = FastAPI()
 
+# uvicorn src.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+@app.get("/ping")
+def pong():
+    return {"ping": "pong!"}
+
 # pydantic models
-class StockIn(BaseModel):
-    ticker: str
-    days: int
+class Input(BaseModel):
+    input: str
 
-class StockOut(StockIn):
-    forecast: dict
+class Output(Input):
+    forecast: int
 
-@app.post("/predict", response_model=StockOut, status_code=200)
-def get_prediction(payload: StockIn):
-    ticker = payload.ticker
-    days = payload.days
+@app.post("/predict", response_model=Output, status_code=200)
+def get_prediction(payload: Input):
+    input = payload.input
 
-    prediction_list = predict(ticker, days)
+    output = predict(input[:1])
 
-    if not prediction_list:
+    if not output:
         raise HTTPException(status_code=400, detail="Model not found.")
 
     response_object = {
-        "ticker": ticker, 
-        "days": days,
-        "forecast": convert(prediction_list)}
+        "input": input[:1], 
+        "output": converts(output)}
     return response_object

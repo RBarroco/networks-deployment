@@ -1,19 +1,45 @@
-import numpy as np
+import joblib
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from xgboost import XGBClassifier
+from pathlib import Path
+from joblib import load
 
-# NOTE: Make sure that the outcome column is labeled 'target' in the data file
-tpot_data = pd.read_csv('PATH/TO/DATA/FILE', sep='COLUMN_SEPARATOR', dtype=np.float64)
-features = tpot_data.drop('target', axis=1)
-training_features, testing_features, training_target, testing_target = \
-            train_test_split(features, tpot_data['target'], random_state=42)
+BASE_DIR="/finalized_model.sav"
+# import will be a row for example from a dataframe
 
-# Average CV score on the training set was: 1.0
-exported_pipeline = XGBClassifier(learning_rate=1.0, max_depth=9, min_child_weight=1, n_estimators=100, n_jobs=1, subsample=0.45, verbosity=0)
-# Fix random state in exported estimator
-if hasattr(exported_pipeline, 'random_state'):
-    setattr(exported_pipeline, 'random_state', 42)
+def predict(input):
+    model_file = Path(BASE_DIR)
+    if not model_file.exists():
+        return False
 
-exported_pipeline.fit(training_features, training_target)
-results = exported_pipeline.predict(testing_features)
+    # input = pd.DataFrame(input)
+    input = pd.DataFrame(input)
+    loaded_model = joblib.load(model_file)
+    output = loaded_model.predict(input)
+    
+#    model.plot(forecast).savefig(f"{ticker}_plot.png")
+#    model.plot_components(forecast).savefig(f"{ticker}_plot_components.png")
+
+    return output
+
+def converts(output):
+    if output == 0:
+        return "Blackhole"
+    elif output == 1:
+        return "Diversion"
+    elif output == 2:
+        return "Normal"
+    elif output == 3:
+        return "Overflow"
+    elif output == 4:
+        return "PortScan"
+    elif output == 5:
+        return "TCP-SYN"
+
+output = converts(predict(input))
+
+print(output)
+# tasks:
+# 1) Check best way to save a xgboost model
+# 2) make that model.py file is working well
+# 3) Requirements.txt
+# 4) 
