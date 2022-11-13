@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Query, HTTPException
 import pandas
 from pydantic import BaseModel
-from src.model import predict, converts
+from model import predict
 
 app = FastAPI()
 
@@ -28,7 +28,8 @@ def get_prediction(payload: Input):
 
     response_object = {
         "input": input, 
-        "output": converts(output)}
+        "output": output
+        }
     return response_object
 
 
