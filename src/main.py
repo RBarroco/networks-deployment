@@ -21,12 +21,12 @@ class Output(Input):
 def get_prediction(payload: Input):
     input = payload.input
 
-    output = predict(input[:1])
+    output = predict(input)
 
     if not output:
         raise HTTPException(status_code=400, detail="Model not found.")
 
     response_object = {
-        "input": input[:1], 
+        "input": input, 
         "output": converts(output)}
     return response_object
