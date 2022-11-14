@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Query, HTTPException
-import pandas
+import pandas as pd
 from pydantic import BaseModel
-from src.model import predict, converts
+from typing import Dict
+from model import predict
 
 app = FastAPI()
 
@@ -10,12 +11,12 @@ app = FastAPI()
 def pong():
     return {"ping": "pong!"}
 
-# pydantic models
+# pydantic models should we input dict
 class Input(BaseModel):
     input: str
 
-class Output(Input):
-    forecast: int
+class Output(BaseModel):
+    forecast: str
 
 @app.post("/predict", response_model=Output, status_code=200)
 def get_prediction(payload: Input):
@@ -26,7 +27,16 @@ def get_prediction(payload: Input):
     if not output:
         raise HTTPException(status_code=400, detail="Model not found.")
 
-    response_object = {
-        "input": input, 
-        "output": converts(output)}
-    return response_object
+    return output
+
+
+# @app.post("/predict", response_model=Output, status_code=200)
+# def get_prediction(payload: Input):
+#     input = pd.DataFrame.read_json(payload.input)
+
+#     output = predict(input)
+
+#     if not output:
+#         raise HTTPException(status_code=400, detail="Model not found.")
+
+#     return output
